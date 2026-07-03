@@ -1,0 +1,41 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment variables (SECURITY - NEVER DELETE THESE LINES)
+.env
+.env.local
+.env.production
+.env.staging
+*.env
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+.turbo/
+.vite/
+
+# IDE and OS
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Testing
+coverage/
+.nyc_output/
+
+# Misc
+*.pem
+*.p12
