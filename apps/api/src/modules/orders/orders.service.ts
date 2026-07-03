@@ -34,7 +34,7 @@ export const ordersService = {
     // 2. Calculate line items
     let subtotal = 0;
     let taxAmount = 0;
-    const orderItemsData = [];
+    const orderItemsData: any[] = [];
 
     for (const item of items) {
       const menuItem = menuItems.find((m) => m.id === item.menuItemId)!;
