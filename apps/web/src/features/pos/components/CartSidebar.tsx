@@ -18,132 +18,226 @@ export const CartSidebar = ({ onProceedToPayment }: CartSidebarProps) => {
     setDiscount,
     tableId,
   } = useCartStore();
+
   const { isCartOpen, toggleCart } = useUIStore();
 
-  const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const tax = subtotal * 0.1; // 10% sales tax
+  const subtotal = items.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
+
+  const tax = subtotal * 0.1;
   const total = subtotal + tax - discount;
 
   if (!isCartOpen) return null;
 
   return (
-    <div className="fixed inset-y-0 right-0 w-96 bg-white shadow-xl z-50 flex flex-col">
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200">
-        <h2 className="text-xl font-bold text-gray-800">Current Order</h2>
-        <button onClick={toggleCart} className="p-2 hover:bg-gray-100 rounded-lg">
-          <X size={24} />
-        </button>
-      </div>
+    <>
+      {/* Overlay */}
+      <div
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+        onClick={toggleCart}
+      />
 
-      {/* Items */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
-        {items.length === 0 ? (
-          <div className="text-center text-gray-500 py-8">No items in cart</div>
-        ) : (
-          items.map((item) => (
-            <div key={item.menuItemId} className="flex items-center justify-between bg-gray-50 rounded-lg p-3">
-              <div className="flex-1">
-                <p className="font-medium text-gray-800">{item.name}</p>
-                <p className="text-sm text-gray-500">${item.price.toFixed(2)} each</p>
-                {item.modifiers && item.modifiers.length > 0 && (
-                  <p className="text-xs text-gray-400">
-                    {item.modifiers.map((m) => m.name).join(', ')}
-                  </p>
-                )}
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => updateQuantity(item.menuItemId, item.quantity - 1)}
-                  className="p-1 hover:bg-gray-200 rounded"
-                >
-                  <Minus size={16} />
-                </button>
-                <span className="w-8 text-center font-medium">{item.quantity}</span>
-                <button
-                  onClick={() => updateQuantity(item.menuItemId, item.quantity + 1)}
-                  className="p-1 hover:bg-gray-200 rounded"
-                >
-                  <Plus size={16} />
-                </button>
-                <button
-                  onClick={() => removeItem(item.menuItemId)}
-                  className="p-1 text-red-500 hover:bg-red-50 rounded ml-2"
-                >
-                  <Trash2 size={16} />
-                </button>
-              </div>
-            </div>
-          ))
-        )}
-      </div>
+      {/* Sidebar */}
+      <div className="fixed inset-y-0 right-0 w-[420px] bg-slate-950/95 backdrop-blur-2xl border-l border-white/10 shadow-2xl z-50 flex flex-col">
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 border-b border-white/10">
+          <div>
+            <h2 className="text-2xl font-bold text-white">
+              Current Order
+            </h2>
 
-      {/* Footer */}
-      <div className="border-t border-gray-200 p-4 space-y-3">
-        <div className="flex items-center gap-4">
-          <label className="text-sm font-medium text-gray-700">Guests:</label>
-          <input
-            type="number"
-            min={1}
-            max={20}
-            value={guestCount}
-            onChange={(e) => setGuestCount(parseInt(e.target.value) || 1)}
-            className="w-16 px-2 py-1 border border-gray-300 rounded-md text-center"
-          />
+            <p className="text-sm text-slate-400">
+              {items.length} item{items.length !== 1 ? 's' : ''}
+            </p>
+          </div>
+
+          <button
+            onClick={toggleCart}
+            className="p-2 rounded-xl text-slate-400 hover:bg-white/5 hover:text-white transition-all"
+          >
+            <X size={24} />
+          </button>
         </div>
 
-        <div className="flex items-center gap-4">
-          <label className="text-sm font-medium text-gray-700">Discount ($):</label>
-          <input
-            type="number"
-            min={0}
-            step={0.5}
-            value={discount}
-            onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)}
-            className="w-24 px-2 py-1 border border-gray-300 rounded-md"
-          />
-        </div>
-
-        <div className="space-y-1 text-sm">
-          <div className="flex justify-between">
-            <span className="text-gray-600">Subtotal:</span>
-            <span className="font-medium">${subtotal.toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-600">Tax (10%):</span>
-            <span className="font-medium">${tax.toFixed(2)}</span>
-          </div>
-          {discount > 0 && (
-            <div className="flex justify-between text-green-600">
-              <span>Discount:</span>
-              <span>-${discount.toFixed(2)}</span>
+        {/* Items */}
+        <div className="flex-1 overflow-y-auto p-5 space-y-4">
+          {items.length === 0 ? (
+            <div className="text-center text-slate-500 py-16">
+              No items in cart
             </div>
+          ) : (
+            items.map((item) => (
+              <div
+                key={item.menuItemId}
+                className="bg-white/5 border border-white/10 rounded-2xl p-4"
+              >
+                <div className="flex justify-between">
+                  <div className="flex-1">
+                    <p className="font-semibold text-white">
+                      {item.name}
+                    </p>
+
+                    <p className="text-sm text-slate-400">
+                      ${item.price.toFixed(2)} each
+                    </p>
+
+                    {item.modifiers && item.modifiers.length > 0 && (
+                      <p className="text-xs text-slate-500 mt-1">
+                        {item.modifiers
+                          .map((m) => m.name)
+                          .join(', ')}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="text-right">
+                    <p className="font-bold text-cyan-400">
+                      ${(item.price * item.quantity).toFixed(2)}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between mt-4">
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() =>
+                        updateQuantity(
+                          item.menuItemId,
+                          item.quantity - 1
+                        )
+                      }
+                      className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center hover:bg-cyan-500/20 transition-all text-cyan-400"
+                    >
+                      <Minus size={14} />
+                    </button>
+
+                    <span className="w-8 text-center text-white font-medium">
+                      {item.quantity}
+                    </span>
+
+                    <button
+                      onClick={() =>
+                        updateQuantity(
+                          item.menuItemId,
+                          item.quantity + 1
+                        )
+                      }
+                      className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center hover:bg-cyan-500/20 transition-all text-cyan-400"
+                    >
+                      <Plus size={14} />
+                    </button>
+                  </div>
+
+                  <button
+                    onClick={() =>
+                      removeItem(item.menuItemId)
+                    }
+                    className="p-2 rounded-lg text-red-400 hover:bg-red-500/10 transition-all"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              </div>
+            ))
           )}
-          <div className="flex justify-between text-lg font-bold text-gray-800 border-t border-gray-200 pt-2">
-            <span>Total:</span>
-            <span>${total.toFixed(2)}</span>
-          </div>
         </div>
 
-        <div className="flex gap-3">
-          <button
-            onClick={clearCart}
-            className="flex-1 px-4 py-2 border border-red-300 text-red-600 rounded-md hover:bg-red-50 transition-colors"
-          >
-            Clear
-          </button>
-          <button
-            onClick={onProceedToPayment}
-            disabled={items.length === 0 || !tableId}
-            className="flex-1 px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
-          >
-            Checkout
-          </button>
+        {/* Footer */}
+        <div className="border-t border-white/10 p-5 space-y-4">
+          {/* Guests */}
+          <div className="flex items-center justify-between">
+            <label className="text-slate-300 text-sm">
+              Guests
+            </label>
+
+            <input
+              type="number"
+              min={1}
+              max={20}
+              value={guestCount}
+              onChange={(e) =>
+                setGuestCount(
+                  parseInt(e.target.value) || 1
+                )
+              }
+              className="w-20 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white text-center focus:outline-none focus:ring-2 focus:ring-cyan-500"
+            />
+          </div>
+
+          {/* Discount */}
+          <div className="flex items-center justify-between">
+            <label className="text-slate-300 text-sm">
+              Discount
+            </label>
+
+            <input
+              type="number"
+              min={0}
+              step={0.5}
+              value={discount}
+              onChange={(e) =>
+                setDiscount(
+                  parseFloat(e.target.value) || 0
+                )
+              }
+              className="w-24 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white text-center focus:outline-none focus:ring-2 focus:ring-cyan-500"
+            />
+          </div>
+
+          {/* Totals */}
+          <div className="space-y-2 pt-4 border-t border-white/10">
+            <div className="flex justify-between text-slate-400">
+              <span>Subtotal</span>
+              <span>${subtotal.toFixed(2)}</span>
+            </div>
+
+            <div className="flex justify-between text-slate-400">
+              <span>Tax (10%)</span>
+              <span>${tax.toFixed(2)}</span>
+            </div>
+
+            {discount > 0 && (
+              <div className="flex justify-between text-emerald-400">
+                <span>Discount</span>
+                <span>- ${discount.toFixed(2)}</span>
+              </div>
+            )}
+
+            <div className="flex justify-between text-2xl font-bold text-white pt-3 border-t border-white/10">
+              <span>Total</span>
+              <span className="text-cyan-400">
+                ${total.toFixed(2)}
+              </span>
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="flex gap-3 pt-2">
+            <button
+              onClick={clearCart}
+              className="flex-1 py-3 rounded-xl border border-red-500/20 bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-all"
+            >
+              Clear
+            </button>
+
+            <button
+              onClick={onProceedToPayment}
+              disabled={items.length === 0 || !tableId}
+              className="flex-1 py-3 rounded-xl bg-cyan-500 text-slate-950 font-bold hover:bg-cyan-400 transition-all disabled:bg-slate-700 disabled:text-slate-500 disabled:cursor-not-allowed"
+            >
+              Checkout
+            </button>
+          </div>
+
+          {!tableId && (
+            <p className="text-center text-red-400 text-sm">
+              Please select a table first
+            </p>
+          )}
         </div>
-        {!tableId && (
-          <p className="text-xs text-red-500 text-center">Please select a table first</p>
-        )}
       </div>
-    </div>
+    </>
   );
 };

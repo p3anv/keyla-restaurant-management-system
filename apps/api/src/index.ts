@@ -11,6 +11,9 @@ import menuRoutes from './modules/menu/menu.routes';  // <-- ADD THIS
 import { ordersRoutes } from './modules/orders/orders.routes';
 import { setupOrderWebSocket } from './modules/orders/orders.websocket';
 import tablesRoutes from './modules/tables/tables.routes';
+import inventoryRoutes from './modules/inventory/inventory.routes';
+import usersRoutes from './modules/users/users.routes';
+
 dotenv.config();
 
 const app = express();
@@ -34,6 +37,9 @@ app.use('/api/v1/menu', menuRoutes);  // <-- ADD THIS
 app.use('/api/v1/orders', ordersRoutes(io));
 app.use('/api/v1/tables', tablesRoutes);
 app.use('/api/v1/orders', ordersRoutes(io));
+app.use('/api/v1/inventory', inventoryRoutes);
+app.use('/api/v1/users', usersRoutes);
+
 
 app.use(errorHandler);
 

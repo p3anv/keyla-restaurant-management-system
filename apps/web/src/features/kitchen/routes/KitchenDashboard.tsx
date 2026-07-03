@@ -1,24 +1,62 @@
 ﻿import { useKitchenOrders } from '@/hooks/queries/useKitchenOrders';
 import { useKitchenWebSocket } from '@/hooks/useKitchenWebSocket';
 import { OrderTicket } from '../components/OrderTicket';
-import { ChefHat, AlertCircle, Wifi, WifiOff } from 'lucide-react';
+
+import {
+  ChefHat,
+  AlertCircle,
+  Wifi,
+  WifiOff,
+} from 'lucide-react';
+
 import { useQueryClient } from '@tanstack/react-query';
 
 export const KitchenDashboard = () => {
-  const { isConnected } = useKitchenWebSocket();
-  const { data: orders, isLoading, error } = useKitchenOrders();
-  const queryClient = useQueryClient();
+  const { isConnected } =
+    useKitchenWebSocket();
 
-  // Debug logs
-  console.log('🔍 Kitchen orders data:', orders);
-  console.log('🔍 Kitchen orders error:', error);
+  const {
+    data: orders,
+    isLoading,
+    error,
+  } = useKitchenOrders();
+
+  const queryClient =
+    useQueryClient();
+
+  const pendingOrders =
+    orders?.filter(
+      (o: any) =>
+        o.status === 'PENDING'
+    ) || [];
+
+  const preparingOrders =
+    orders?.filter(
+      (o: any) =>
+        o.status ===
+        'PREPARING'
+    ) || [];
+
+  const readyOrders =
+    orders?.filter(
+      (o: any) =>
+        o.status === 'READY'
+    ) || [];
+
+  const totalActive =
+    pendingOrders.length +
+    preparingOrders.length +
+    readyOrders.length;
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
+      <div className="flex items-center justify-center h-[70vh]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
-          <p className="mt-4 text-gray-500">Loading orders...</p>
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-cyan-500 mx-auto"></div>
+
+          <p className="mt-6 text-slate-400">
+            Loading kitchen orders...
+          </p>
         </div>
       </div>
     );
@@ -26,52 +64,12 @@ export const KitchenDashboard = () => {
 
   if (error) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <AlertCircle className="w-12 h-12 text-red-500 mx-auto" />
-          <p className="mt-4 text-red-600">Failed to load orders</p>
-        </div>
-      </div>
-    );
-  }
+      <div className="flex items-center justify-center h-[70vh]">
+        <div className="bg-red-500/10 border border-red-500/20 rounded-3xl p-10 text-center">
+          <AlertCircle className="w-16 h-16 text-red-400 mx-auto" />
 
-  // Group orders by status
-  const pendingOrders = orders?.filter((o: any) => o.status === 'PENDING') || [];
-  const preparingOrders = orders?.filter((o: any) => o.status === 'PREPARING') || [];
-  const readyOrders = orders?.filter((o: any) => o.status === 'READY') || [];
-
-  const totalActive = pendingOrders.length + preparingOrders.length + readyOrders.length;
-
-  if (totalActive === 0) {
-    return (
-      <div>
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">Kitchen Display</h1>
-          <div className="flex items-center gap-2">
-            {isConnected ? (
-              <span className="flex items-center gap-1 text-sm text-green-600">
-                <Wifi className="w-4 h-4" />
-                Live
-              </span>
-            ) : (
-              <span className="flex items-center gap-1 text-sm text-red-500">
-                <WifiOff className="w-4 h-4" />
-                Disconnected
-              </span>
-            )}
-            <button
-              onClick={() => queryClient.invalidateQueries({ queryKey: ['kitchen-orders'] })}
-              className="px-3 py-1 bg-gray-200 text-gray-700 rounded text-sm hover:bg-gray-300 ml-2"
-            >
-              🔄 Refresh
-            </button>
-          </div>
-        </div>
-        <div className="flex flex-col items-center justify-center h-64 bg-white rounded-lg shadow-sm border border-gray-200">
-          <ChefHat className="w-16 h-16 text-gray-300 mb-4" />
-          <p className="text-gray-500 text-lg">No active orders</p>
-          <p className="text-gray-400 text-sm">
-            {isConnected ? 'Waiting for new orders...' : 'WebSocket disconnected'}
+          <p className="mt-5 text-red-300 text-lg">
+            Failed to load kitchen orders
           </p>
         </div>
       </div>
@@ -79,56 +77,171 @@ export const KitchenDashboard = () => {
   }
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Kitchen Display</h1>
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-gray-500">{totalActive} active orders</span>
+    <div className="space-y-8">
+
+      {/* Header */}
+      <div className="flex justify-between items-center flex-wrap gap-4">
+        <div>
+          <h1 className="text-4xl font-bold text-white">
+            Kitchen Display
+          </h1>
+
+          <p className="text-slate-400 mt-1">
+            {totalActive} active orders
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3">
+
           {isConnected ? (
-            <span className="flex items-center gap-1 text-sm text-green-600">
+            <div className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-emerald-500/15 border border-emerald-500/20 text-emerald-300">
               <Wifi className="w-4 h-4" />
               Live
-            </span>
+            </div>
           ) : (
-            <span className="flex items-center gap-1 text-sm text-red-500">
+            <div className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-red-500/15 border border-red-500/20 text-red-300">
               <WifiOff className="w-4 h-4" />
-              Disconnected
-            </span>
+              Offline
+            </div>
           )}
+
           <button
-            onClick={() => queryClient.invalidateQueries({ queryKey: ['kitchen-orders'] })}
-            className="px-3 py-1 bg-gray-200 text-gray-700 rounded text-sm hover:bg-gray-300"
+            onClick={() =>
+              queryClient.invalidateQueries({
+                queryKey: [
+                  'kitchen-orders',
+                ],
+              })
+            }
+            className="
+              px-5
+              py-2
+              rounded-2xl
+              bg-white/5
+              border
+              border-white/10
+              text-slate-300
+              hover:bg-white/10
+              transition-all
+            "
           >
-            🔄 Refresh
+            Refresh
           </button>
         </div>
       </div>
 
-      {/* Status summary badges */}
-      <div className="flex flex-wrap gap-3 mb-6">
-        <div className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm flex items-center gap-1">
-          <span className="font-bold">{pendingOrders.length}</span> Pending
+      {/* Status Summary */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+
+        <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-3xl p-5">
+          <p className="text-yellow-300 text-sm">
+            Pending Orders
+          </p>
+
+          <p className="text-5xl font-bold text-yellow-400 mt-2">
+            {pendingOrders.length}
+          </p>
         </div>
-        <div className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm flex items-center gap-1">
-          <span className="font-bold">{preparingOrders.length}</span> Preparing
+
+        <div className="bg-cyan-500/10 border border-cyan-500/20 rounded-3xl p-5">
+          <p className="text-cyan-300 text-sm">
+            Preparing
+          </p>
+
+          <p className="text-5xl font-bold text-cyan-400 mt-2">
+            {preparingOrders.length}
+          </p>
         </div>
-        <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm flex items-center gap-1">
-          <span className="font-bold">{readyOrders.length}</span> Ready
+
+        <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-3xl p-5">
+          <p className="text-emerald-300 text-sm">
+            Ready
+          </p>
+
+          <p className="text-5xl font-bold text-emerald-400 mt-2">
+            {readyOrders.length}
+          </p>
         </div>
+
       </div>
 
-      {/* Orders Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {pendingOrders.map((order: any) => (
-          <OrderTicket key={order.id} order={order} />
-        ))}
-        {preparingOrders.map((order: any) => (
-          <OrderTicket key={order.id} order={order} />
-        ))}
-        {readyOrders.map((order: any) => (
-          <OrderTicket key={order.id} order={order} />
-        ))}
-      </div>
+      {/* Empty State */}
+      {totalActive === 0 ? (
+        <div className="bg-slate-900/70 backdrop-blur-xl border border-white/10 rounded-3xl h-[400px] flex flex-col justify-center items-center">
+          <ChefHat className="w-20 h-20 text-slate-600 mb-6" />
+
+          <p className="text-2xl text-white">
+            No Active Orders
+          </p>
+
+          <p className="text-slate-500 mt-2">
+            {isConnected
+              ? 'Waiting for incoming orders...'
+              : 'Kitchen websocket disconnected'}
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-10">
+
+          {pendingOrders.length > 0 && (
+            <section>
+              <h2 className="text-yellow-400 text-xl font-bold mb-5">
+                Pending
+              </h2>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+                {pendingOrders.map(
+                  (order: any) => (
+                    <OrderTicket
+                      key={order.id}
+                      order={order}
+                    />
+                  )
+                )}
+              </div>
+            </section>
+          )}
+
+          {preparingOrders.length > 0 && (
+            <section>
+              <h2 className="text-cyan-400 text-xl font-bold mb-5">
+                Preparing
+              </h2>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+                {preparingOrders.map(
+                  (order: any) => (
+                    <OrderTicket
+                      key={order.id}
+                      order={order}
+                    />
+                  )
+                )}
+              </div>
+            </section>
+          )}
+
+          {readyOrders.length > 0 && (
+            <section>
+              <h2 className="text-emerald-400 text-xl font-bold mb-5">
+                Ready For Service
+              </h2>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+                {readyOrders.map(
+                  (order: any) => (
+                    <OrderTicket
+                      key={order.id}
+                      order={order}
+                    />
+                  )
+                )}
+              </div>
+            </section>
+          )}
+
+        </div>
+      )}
     </div>
   );
 };

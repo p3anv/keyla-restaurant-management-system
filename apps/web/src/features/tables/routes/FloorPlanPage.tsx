@@ -1,12 +1,23 @@
 ﻿import { useTables } from '@/hooks/queries/useTables';
 import { useUpdateTable } from '@/hooks/queries/useUpdateTable';
 
-// Map status to Tailwind colors
 const statusStyles = {
-  FREE: 'border-green-400 bg-green-50',
-  OCCUPIED: 'border-red-400 bg-red-50',
-  RESERVED: 'border-yellow-400 bg-yellow-50',
-  OUT_OF_SERVICE: 'border-gray-400 bg-gray-200 opacity-60',
+  FREE: {
+    card: 'border-emerald-500/30 bg-emerald-500/10',
+    badge: 'bg-emerald-500/20 text-emerald-300',
+  },
+  OCCUPIED: {
+    card: 'border-red-500/30 bg-red-500/10',
+    badge: 'bg-red-500/20 text-red-300',
+  },
+  RESERVED: {
+    card: 'border-yellow-500/30 bg-yellow-500/10',
+    badge: 'bg-yellow-500/20 text-yellow-300',
+  },
+  OUT_OF_SERVICE: {
+    card: 'border-slate-500/30 bg-slate-500/10 opacity-70',
+    badge: 'bg-slate-500/20 text-slate-300',
+  },
 };
 
 const statusLabels = {
@@ -17,60 +28,166 @@ const statusLabels = {
 };
 
 export const FloorPlanPage = () => {
-  const { data: tables, isLoading } = useTables();
-  const { mutate: updateTable } = useUpdateTable();
+  const { data: tables, isLoading } =
+    useTables();
 
-  const handleStatusChange = (tableId: string, newStatus: string) => {
-    if (!confirm(`Change Table to "${newStatus}"?`)) return;
-    updateTable({ tableId, status: newStatus });
+  const {
+    mutate: updateTable,
+  } = useUpdateTable();
+
+  const handleStatusChange = (
+    tableId: string,
+    newStatus: string
+  ) => {
+    if (
+      !confirm(
+        `Change table status to "${newStatus}"?`
+      )
+    )
+      return;
+
+    updateTable({
+      tableId,
+      status: newStatus,
+    });
   };
 
   if (isLoading) {
-    return <div className="text-gray-500">Loading tables...</div>;
+    return (
+      <div className="text-slate-400">
+        Loading tables...
+      </div>
+    );
   }
 
-  if (!tables || tables.length === 0) {
-    return <div className="text-gray-500">No tables found. Please add some.</div>;
+  if (
+    !tables ||
+    tables.length === 0
+  ) {
+    return (
+      <div className="text-slate-400">
+        No tables found.
+      </div>
+    );
   }
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Floor Plan</h1>
-        <span className="text-sm text-gray-500">Click dropdown to change table status</span>
+    <div className="space-y-8">
+
+      {/* Header */}
+      <div className="flex justify-between items-center flex-wrap gap-4">
+        <div>
+          <h1 className="text-4xl font-bold text-white">
+            Floor Plan
+          </h1>
+
+          <p className="text-slate-400 mt-2">
+            Manage restaurant table status
+          </p>
+        </div>
+
+        <div className="bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-slate-400 text-sm">
+          Click a dropdown to update status
+        </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-        {tables.map((table) => (
-          <div
-            key={table.id}
-            className={`p-4 rounded-lg border-2 text-center transition-colors relative ${
-              statusStyles[table.status as keyof typeof statusStyles] || 'border-gray-300 bg-gray-100'
-            }`}
-          >
-            <div className="text-2xl font-bold text-gray-800">{table.tableNumber}</div>
-            <div className="text-xs text-gray-500">Capacity: {table.capacity}</div>
-            
-            {/* Manual Status Dropdown */}
-            <div className="mt-3">
-              <select
-                value={table.status}
-                onChange={(e) => handleStatusChange(table.id, e.target.value)}
-                className="w-full text-xs px-2 py-1 border border-gray-300 rounded-md bg-white shadow-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+      {/* Table Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-6">
+        {tables.map((table) => {
+          const style =
+            statusStyles[
+              table.status as keyof typeof statusStyles
+            ];
+
+          return (
+            <div
+              key={table.id}
+              className={`
+                backdrop-blur-xl
+                border
+                rounded-3xl
+                p-5
+                text-center
+                transition-all
+                hover:scale-105
+                hover:shadow-xl
+                ${style.card}
+              `}
+            >
+              {/* Table Number */}
+              <div className="text-5xl font-bold text-white">
+                {table.tableNumber}
+              </div>
+
+              <div className="text-slate-400 text-sm mt-2">
+                Capacity: {table.capacity}
+              </div>
+
+              {/* Status Badge */}
+              <div
+                className={`
+                  mt-4
+                  inline-block
+                  px-4
+                  py-2
+                  rounded-full
+                  text-sm
+                  font-semibold
+                  ${style.badge}
+                `}
               >
-                <option value="FREE">Free</option>
-                <option value="OCCUPIED">Occupied</option>
-                <option value="RESERVED">Reserved</option>
-                <option value="OUT_OF_SERVICE">Out of Service</option>
-              </select>
+                {
+                  statusLabels[
+                    table.status as keyof typeof statusLabels
+                  ]
+                }
+              </div>
+
+              {/* Dropdown */}
+              <div className="mt-5">
+                <select
+                  value={table.status}
+                  onChange={(e) =>
+                    handleStatusChange(
+                      table.id,
+                      e.target.value
+                    )
+                  }
+                  className="
+                    w-full
+                    bg-slate-900/80
+                    border
+                    border-white/10
+                    rounded-xl
+                    px-3
+                    py-2
+                    text-sm
+                    text-white
+                    focus:outline-none
+                    focus:ring-2
+                    focus:ring-cyan-500
+                  "
+                >
+                  <option value="FREE">
+                    Free
+                  </option>
+
+                  <option value="OCCUPIED">
+                    Occupied
+                  </option>
+
+                  <option value="RESERVED">
+                    Reserved
+                  </option>
+
+                  <option value="OUT_OF_SERVICE">
+                    Out of Service
+                  </option>
+                </select>
+              </div>
             </div>
-            
-            {/* Current status badge */}
-            <div className="mt-2 text-xs font-medium">
-              {statusLabels[table.status as keyof typeof statusLabels] || table.status}
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
