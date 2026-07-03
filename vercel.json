@@ -1,0 +1,7 @@
+{
+  "rootDirectory": "apps/web",
+  "framework": "vite",
+  "installCommand": "pnpm install",
+  "buildCommand": "pnpm build",
+  "outputDirectory": "dist"
+}
