@@ -13,7 +13,11 @@ export const authService = {
       data: { email, passwordHash: hashedPassword, name, role: 'WAITER' },
     });
 
-    const accessToken = jwt.sign({ userId: user.id }, env.JWT_ACCESS_SECRET, { expiresIn: env.JWT_ACCESS_EXPIRY });
+    const accessToken = jwt.sign(
+  { userId: user.id },
+  env.JWT_ACCESS_SECRET,
+  { expiresIn: env.JWT_ACCESS_EXPIRY } as jwt.SignOptions
+);
     const refreshToken = jwt.sign({ userId: user.id }, env.JWT_REFRESH_SECRET, { expiresIn: env.JWT_REFRESH_EXPIRY });
 
     return {
