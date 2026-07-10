@@ -88,3 +88,97 @@ This project is a **Turborepo monorepo** with strict separation of concerns.
 git clone https://github.com/p3anv/keyla-restaurant-management-system.git
 cd keyla-restaurant-management-system
 pnpm install
+
+
+3. Environment Setup
+
+Backend (.env in apps/api/):
+env
+
+DATABASE_URL="postgresql://user:pass@localhost:5432/restaurant_db"
+REDIS_URL="redis://localhost:6379"
+JWT_ACCESS_SECRET="your-access-secret-32chars"
+JWT_REFRESH_SECRET="your-refresh-secret-32chars"
+FRONTEND_URL="http://localhost:5173"
+
+Frontend (.env in apps/web/):
+env
+
+VITE_API_URL="http://localhost:5000"
+VITE_WS_URL="ws://localhost:5000"
+
+4. Database Setup
+bash
+
+cd apps/api
+pnpm prisma:migrate   # Run migrations
+pnpm prisma:seed      # Seed admin & sample data
+
+5. Run the Application
+bash
+
+# Terminal 1 – Backend
+cd apps/api && pnpm dev
+
+# Terminal 2 – Frontend
+cd apps/web && pnpm dev
+
+Open http://localhost:5173 🚀
+🔌 API Snapshot (Core Endpoints)
+Method	Endpoint	Description
+POST	/api/v1/auth/login	User login
+GET	/api/v1/menu	Fetch full menu (cached)
+POST	/api/v1/orders	Create an order (ACID transaction)
+PATCH	/api/v1/orders/:id/status	Update order status (Kitchen)
+GET	/api/v1/tables	Fetch floor plan
+PATCH	/api/v1/tables/:id	Update table status
+GET	/api/v1/inventory	Fetch stock levels
+🧪 Test the Live App Flow
+
+    Login → admin@restaurant.com / admin123
+
+    POS → Select a table → Add items → Place order
+
+    Kitchen → Open in new tab → Order appears in real‑time
+
+    Admin → Manage menu items, stock, and staff
+
+🛡️ Security & Best Practices
+
+    ✅ Passwords hashed with bcryptjs
+
+    ✅ JWT short‑lived access tokens (15 min) + refresh tokens (7 days)
+
+    ✅ CORS restricted to frontend origin
+
+    ✅ Zod validation on all incoming payloads
+
+    ✅ Role‑Based Access Control (RBAC) on every route
+
+📁 Project Structure (Quick View)
+text
+
+restaurant-management-system/
+├── apps/
+│   ├── api/                # Backend (Express + Prisma)
+│   │   ├── prisma/         # Schema & migrations
+│   │   └── src/modules/    # Features (auth, orders, menu, etc.)
+│   └── web/                # Frontend (React + Vite)
+│       ├── src/features/   # Slices (pos, kitchen, admin)
+│       └── src/stores/     # Zustand state
+├── packages/
+│   └── shared-types/       # Zod schemas & TS types
+└── package.json            # Turborepo root
+
+🤝 Contributing
+
+This is a proprietary enterprise project. For internal use only.
+Suggestions and feedback are welcome via the issues tracker.
+📄 License
+
+Proprietary – All rights reserved.
+Built for enterprise deployment & educational demonstration.
+🙌 Acknowledgments
+
+Built with ❤️ using the T3 Stack philosophy (TypeScript, Tailwind, Prisma) plus React, Express, and Socket.io for real-time magic.
+<div align="center"> <sub>🚀 Version 1.0.0 – Production Ready</sub> </div> ``
